@@ -22,19 +22,15 @@ fn main() {
 }
 
 fn handle_incoming_connection(mut stream: TcpStream) {
-    let mut buf = [0; 1024];
-    for _ in 0..1024 {
-        let bytes_read = stream.read(&mut buf).expect("Failed to read stream");
-        if bytes_read == 0 {
+    let mut buf = [0; 512];
+    // read 1024 bytes at a time
+    loop {
+        let read_count = stream.read(&mut buf).unwrap();
+        if read_count == 0 {
             break;
         }
-        print!["{}", String::from_utf8(buf.to_vec()).unwrap()];
-        if true | (String::from_utf8(buf.to_vec()).expect("invalid bytes") == String::from("ping"))
-        {
-            stream
-                .write_all("+PONG\r\n".as_bytes())
-                .expect("Failed to write");
-
-        }
+        println!("received {} bytes", read_count);
+        stream.write(b"+PONG\r\n").unwrap();
     }
+
 }
