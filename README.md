@@ -1,35 +1,16 @@
-[![progress-banner](https://backend.codecrafters.io/progress/redis/842132a5-ab1c-4055-a622-c9483580b466)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# RED RUST
 
-This is a starting point for Rust solutions to the
-["Build Your Own Redis" Challenge](https://codecrafters.io/challenges/redis).
+## A key value memory storage Redis alternative built with Rust
 
-In this challenge, you'll build a toy Redis clone that's capable of handling
-basic commands like `PING`, `SET` and `GET`. Along the way we'll learn about
-event loops, the Redis protocol and more.
+👀 Hey there! So, I've been tinkering with something pretty neat lately called RedRust. It's essentially a fast alternative to Redis, it's all built using Rust.
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+Now, why did I decide to roll with RedRust? Well, just recently, Redis threw us all a curveball by switching up its license to this whole dual 'source-available' deal. Not exactly developer-friendly, especially for those of us in the commercial game. So, I thought, why not cook up a solution that's hassle-free for everyone?
 
-# Passing the first stage
+Plus, I've been itching to really sink my teeth into Rust, you know? So, I figured, why not kill two birds with one stone? Thus, Radish was born!
 
-The entry point for your Redis implementation is in `src/main.rs`. Study and
-uncomment the relevant code, and push your changes to pass the first stage:
+Now, before you go tossing Radish into your production stack, a little heads-up - it's still in the oven, so to speak.
 
-```sh
-git add .
-git commit -m "pass 1st stage" # any msg
-git push origin master
-```
+Not fully battle-tested yet. Currently still in development mode, would love to get your contributions though!!!
+But hey, I've decided to pour everything I've got into making it rock-solid, even if it's just me flying solo on this project.
 
-That's all!
-
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
-
-1. Ensure you have `cargo (1.54)` installed locally
-1. Run `./spawn_redis_server.sh` to run your Redis server, which is implemented
-   in `src/main.rs`. This command compiles your Rust project, so it might be
-   slow the first time you run it. Subsequent runs will be fast.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+And here's the deal - all I'm asking for is a little ⭐ in return. Just a small token of appreciation
