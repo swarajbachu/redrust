@@ -1,12 +1,14 @@
-mod commands;
+mod response;
+mod command;
 
-use std::{collections::HashMap, sync::Arc, sync::Mutex};
+use std::collections::HashMap;
 
-use commands::Value;
+use response::Value;
 use tokio::net::{TcpListener, TcpStream};
 use anyhow::Result;
 
-type Database = Arc<Mutex<HashMap<String, String>>>;
+use crate::command::Database;
+
 
 #[tokio::main]
 async fn main() {
@@ -39,7 +41,8 @@ async fn main() {
 
 async fn handle_incoming_connection(stream: TcpStream,db: Database) {
 
-    let mut handler = commands::CommandHandler::new(stream);
+    let mut handler = response::ResponseHandler::new(stream);
+    let command_handler = command::CommandHandler::new(db.clone());
     println!("Starting read loop");
     loop {
         let value = handler.read_value().await.unwrap();
@@ -53,15 +56,33 @@ async fn handle_incoming_connection(stream: TcpStream,db: Database) {
                 "set" => {
                     let key = unpack_bulk_str(args.get(0).unwrap().clone()).unwrap();
                     let value = unpack_bulk_str(args.get(1).unwrap().clone()).unwrap();
-                    handle_set(db.clone(), key, value);
+                    let expiration_time = match args.get(2) {
+                        None => None,
+                        Some(Value::BulkString(sub_command)) => {
+                            println!("sub_command = {:?} {}:?", sub_command, sub_command != "px");
+                            if sub_command != "px" {
+                                panic!("Invalid expiration time")
+                            }
+                            match args.get(3) {
+                                None => None,
+                                Some(Value::BulkString(time)) => {
+                                    // add expiration
+                                    // parse time to i64
+                                    let time = time.parse::<i64>().unwrap();
+                                    Some(time)
+                                }
+                                _ => panic!("Invalid expiration time"),
+                            }
+                        }
+                        _ => panic!("Invalid expiration time"),
+                    };
+                    command_handler.handle_set(key, value,expiration_time);
                     Value::SimpleString("OK".to_string())
                 },
                 "get" => {
                     let key = unpack_bulk_str(args.get(0).unwrap().clone()).unwrap();
-                    match handle_get(db.clone(), key) {
-                        Some(value) => Value::BulkString(value),
-                        None => Value::NullBulkString,
-                    }
+                    let  res =  command_handler.handle_get(key);
+                    res
                 },
                 c => panic!("Cannot handle command {}", c),
             }
@@ -73,14 +94,6 @@ async fn handle_incoming_connection(stream: TcpStream,db: Database) {
     }
 }
 
-fn handle_set(db:Database, key: String, value: String) {
-    let mut db = db.lock().unwrap();
-    db.insert(key, value);
-}
-fn handle_get(db:Database, key: String) -> Option<String> {
-    let db = db.lock().unwrap();
-    db.get(&key).cloned()
-}
 
 
 fn extract_command(value: Value) -> Result<(String, Vec<Value>)> {

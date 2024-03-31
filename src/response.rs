@@ -2,12 +2,12 @@ use tokio::{net::TcpStream, io::{AsyncReadExt, AsyncWriteExt}};
 use::bytes::BytesMut;
 use anyhow::Result;
 
-pub struct CommandHandler {
+pub struct ResponseHandler {
     stream: TcpStream,
     buffer: BytesMut
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum  Value {
     SimpleString(String),
     BulkString(String),
@@ -20,15 +20,16 @@ impl Value {
         match self {
             Value::SimpleString(s) => format!("+{}\r\n", s),
             Value::BulkString(s) => format!("${}\r\n{}\r\n", s.chars().count(), s),
+            Value::NullBulkString => format!("$-1\r\n"),
             _ => panic!("Unsupported value for serialize"),
         }
     }
 }
 
 
-impl CommandHandler {
+impl ResponseHandler {
     pub fn new(stream: TcpStream) -> Self {
-        CommandHandler {
+        ResponseHandler {
             stream,
             buffer: BytesMut::with_capacity(1024)
         }
